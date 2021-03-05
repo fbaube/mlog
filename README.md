@@ -1,5 +1,6 @@
-# ozzo-log
+# mlog
 
+<!--
 [![GoDoc](https://godoc.org/github.com/go-ozzo/ozzo-log?status.png)](http://godoc.org/github.com/go-ozzo/ozzo-log)
 [![Build Status](https://travis-ci.org/go-ozzo/ozzo-log.svg?branch=master)](https://travis-ci.org/go-ozzo/ozzo-log)
 [![Coverage Status](https://coveralls.io/repos/github/go-ozzo/ozzo-log/badge.svg?branch=master)](https://coveralls.io/github/go-ozzo/ozzo-log?branch=master)
@@ -10,6 +11,15 @@
 [简体中文](/docs/README-zh-CN.md) [Русский](/docs/README-ru.md)
 
 ## Description
+-->
+mlog (multi-logger) is a fork of github.com/go-ozzo/ozzo-log (MIT license).
+
+It has these mods and enhancements:
+
+* HtmlSimple logger target, which send to an HTML element ID, and converts every newline to `<br/>`
+* Emojis for each logging level, added at the start of each log message 
+
+_(resume old README)_
 
 ozzo-log is a Go package providing enhanced logging support for Go programs. It has the following features:
 
