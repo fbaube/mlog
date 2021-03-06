@@ -10,13 +10,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-ozzo/ozzo-log"
+	log "github.com/fbaube/mlog"
 )
 
 func TestNewFileTarget(t *testing.T) {
 	target := log.NewFileTarget()
-	if target.MaxLevel != log.LevelDebug {
-		t.Errorf("NewFileTarget.MaxLevel = %v, expected %v", target.MaxLevel, log.LevelDebug)
+	if target.MaxLevel != log.LevelDbg {
+		t.Errorf("NewFileTarget.MaxLevel = %v, expected %v",
+			target.MaxLevel, log.LevelDbg)
 	}
 	if target.Rotate != true {
 		t.Errorf("NewFileTarget.Rotate = %v, expected %v", target.Rotate, true)

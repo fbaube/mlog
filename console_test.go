@@ -8,13 +8,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-ozzo/ozzo-log"
+	log "github.com/fbaube/mlog"
 )
 
 func TestNewConsoleTarget(t *testing.T) {
 	target := log.NewConsoleTarget()
-	if target.MaxLevel != log.LevelDebug {
-		t.Errorf("ConsoleTarget.MaxLevel = %v, expected %v", target.MaxLevel, log.LevelDebug)
+	if target.MaxLevel != log.LevelDbg {
+		t.Errorf("ConsoleTarget.MaxLevel = %v, expected %v",
+			target.MaxLevel, log.LevelDbg)
 	}
 	if target.ColorMode != true {
 		t.Errorf("ConsoleTarget.ColorMode = %v, expected %v", target.ColorMode, true)

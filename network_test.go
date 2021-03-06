@@ -9,13 +9,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-ozzo/ozzo-log"
+	log "github.com/fbaube/mlog"
 )
 
 func TestNewNetworkTarget(t *testing.T) {
 	target := log.NewNetworkTarget()
-	if target.MaxLevel != log.LevelDebug {
-		t.Errorf("NetworkTarget.MaxLevel = %v, expected %v", target.MaxLevel, log.LevelDebug)
+	if target.MaxLevel != log.LevelDbg {
+		t.Errorf("NetworkTarget.MaxLevel = %v, expected %v", target.MaxLevel, log.LevelDbg)
 	}
 	if !target.Persistent {
 		t.Errorf("NetworkTarget.Persistent should be true, got false")

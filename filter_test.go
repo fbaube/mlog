@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-ozzo/ozzo-log"
+	log "github.com/fbaube/mlog"
 )
 
 func TestFilterAllow(t *testing.T) {
@@ -28,7 +28,7 @@ func TestFilterAllow(t *testing.T) {
 		{[]string{"system.*"}, "system.db", true},
 	}
 	for _, test := range tests {
-		filter := log.Filter{MaxLevel: log.LevelDebug, Categories: test.cats}
+		filter := log.Filter{MaxLevel: log.LevelDbg, Categories: test.cats}
 		filter.Init()
 		e := &log.Entry{Category: test.cat}
 		if filter.Allow(e) != test.expected {

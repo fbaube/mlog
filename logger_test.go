@@ -8,14 +8,15 @@ import (
 	"io"
 	"testing"
 
-	"github.com/go-ozzo/ozzo-config"
-	"github.com/go-ozzo/ozzo-log"
+	log "github.com/fbaube/mlog"
+	"github.com/go-git/go-git/plumbing/format/config"
 )
 
 func TestNewLogger(t *testing.T) {
 	logger := log.NewLogger()
-	if logger.MaxLevel != log.LevelDebug {
-		t.Errorf("NewLogger().MaxLevel = %v, expected %v", logger.MaxLevel, log.LevelDebug)
+	if logger.MaxLevel != log.LevelDbg {
+		t.Errorf("NewLogger().MaxLevel = %v, expected %v",
+			logger.MaxLevel, log.LevelDbg)
 	}
 	if logger.Category != "app" {
 		t.Errorf("NewLogger().Category = %v, expected %v", logger.Category, "app")
@@ -85,14 +86,11 @@ func TestLoggerLog(t *testing.T) {
 	}
 
 	logger.Log(log.LevelInfo, "t0: %v", 1)
-	logger.Debug("t1: %v", 2)
+	logger.Dbg("t1: %v", 2)
 	logger.Info("t2")
 	logger.Warning("t3")
-	logger.Notice("t4")
 	logger.Error("t5")
-	logger.Critical("t6")
-	logger.Alert("t7")
-	logger.Emergency("t8")
+	logger.Panic("t6")
 
 	logger.Close()
 
