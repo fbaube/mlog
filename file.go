@@ -35,11 +35,11 @@ type FileTarget struct {
 
 // NewFileTarget creates a FileTarget.
 // The new FileTarget takes these default options:
-// MaxLevel: LevelDebug, Rotate: true, BackupCount: 10, MaxBytes: 1 << 20
-// You must specify the FileName field.
+// MaxLevel: LevelNotice, Rotate: true, BackupCount: 10, MaxBytes: 1 << 20
+// After calling this, you must fill in the FileName field.
 func NewFileTarget() *FileTarget {
 	return &FileTarget{
-		Filter:      &Filter{MaxLevel: LevelDebug},
+		Filter:      &Filter{MaxLevel: LevelInfo},
 		Rotate:      true,
 		BackupCount: 10,
 		MaxBytes:    1 << 20, // 1MB

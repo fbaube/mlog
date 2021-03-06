@@ -39,11 +39,11 @@ type NetworkTarget struct {
 
 // NewNetworkTarget creates a NetworkTarget.
 // The new NetworkTarget takes these default options:
-// MaxLevel: LevelDebug, Persistent: true, BufferSize: 1024.
+// MaxLevel: LevelDbg, Persistent: true, BufferSize: 1024.
 // You must specify the Network and Address fields.
 func NewNetworkTarget() *NetworkTarget {
 	return &NetworkTarget{
-		Filter:     &Filter{MaxLevel: LevelDebug},
+		Filter:     &Filter{MaxLevel: LevelDbg},
 		BufferSize: 1024,
 		Persistent: true,
 		close:      make(chan bool, 0),

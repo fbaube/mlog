@@ -29,11 +29,11 @@ type MailTarget struct {
 
 // NewMailTarget creates a MailTarget.
 // The new MailTarget takes these default options:
-// MaxLevel: LevelDebug, BufferSize: 1024.
+// MaxLevel: LevelDbg, BufferSize: 1024.
 // You must specify these fields: Host, Username, Subject, Sender, and Recipients.
 func NewMailTarget() *MailTarget {
 	return &MailTarget{
-		Filter:     &Filter{MaxLevel: LevelDebug},
+		Filter:     &Filter{MaxLevel: LevelDbg},
 		BufferSize: 1024,
 		close:      make(chan bool, 0),
 	}

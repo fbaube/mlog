@@ -17,31 +17,29 @@ import (
 	"time"
 )
 
-// RFC5424 log message levels.
-const (
-	LevelEmergency Level = iota
-	LevelAlert
-	LevelCritical
-	LevelError
-	LevelWarning
-	LevelNotice
-	LevelInfo
-	LevelDebug
-)
-
 // Level describes the level of a log message.
 type Level int
 
+// RFC5424 log message levels.
+const (
+	LevelPanic    Level = iota + 2
+	LevelError          // 3
+	LevelWarning        // 4
+	LevelSuccess        // 5
+	LevelInfo           // 6
+	LevelProgress       // 7
+	LevelDbg            // misspelled cos 8 != RFC5424 "7"
+)
+
 // LevelNames maps log levels to names
 var LevelNames = map[Level]string{
-	LevelDebug:     "Debug",
-	LevelInfo:      "Info",
-	LevelNotice:    "Notice",
-	LevelWarning:   "Warning",
-	LevelError:     "Error",
-	LevelCritical:  "Critical",
-	LevelAlert:     "Alert",
-	LevelEmergency: "Emergency",
+	LevelDbg:      "Debug",
+	LevelProgress: "Progress",
+	LevelInfo:     "Info",
+	LevelSuccess:  "Success",
+	LevelWarning:  "Warning",
+	LevelError:    "Error",
+	LevelPanic:    "PANIC",
 }
 
 // String returns the string representation of the log level
@@ -49,7 +47,7 @@ func (l Level) String() string {
 	if name, ok := LevelNames[l]; ok {
 		return name
 	}
-	return "Unknown"
+	return "Unknown_WTH"
 }
 
 // Entry represents a log entry.
@@ -68,18 +66,19 @@ func (e *Entry) String() string {
 	return e.FormattedMessage
 }
 
-// Target represents a target where the logger can send log messages to for further processing.
+// Target represents a target where the logger can
+// send log messages to for further processing.
 type Target interface {
 	// Open prepares the target for processing log messages.
-	// Open will be invoked when Logger.Open() is called.
+	// Called when Logger.Open() is called.
 	// If an error is returned, the target will be removed from the logger.
 	// errWriter should be used to write errors found while processing log messages.
 	Open(errWriter io.Writer) error
 	// Process processes an incoming log message.
 	Process(*Entry)
 	// Close closes a target.
-	// Close is called when Logger.Close() is called, which gives each target
-	// a chance to flush the logged messages to their destination storage.
+	// Called when Logger.Close() is called; each target gets
+	// a chance to flush its log messages to its destination.
 	Close()
 }
 
@@ -115,16 +114,16 @@ func NewLogger() *Logger {
 	logger := &coreLogger{
 		ErrorWriter: os.Stderr,
 		BufferSize:  1024,
-		MaxLevel:    LevelDebug,
+		MaxLevel:    LevelDbg,
 		Targets:     make([]Target, 0),
 	}
 	return &Logger{logger, "app", DefaultFormatter}
 }
 
 // GetLogger creates a logger with the specified category and log formatter.
-// Messages logged through this logger will carry the same category name.
+// Messages logged thru this logger will carry the same category name.
 // The formatter, if not specified, will inherit from the calling logger.
-// It will be used to format all messages logged through this logger.
+// It will be used to format all messages logged thru this logger.
 func (l *Logger) GetLogger(category string, formatter ...Formatter) *Logger {
 	if len(formatter) > 0 {
 		return &Logger{l.coreLogger, category, formatter[0]}
@@ -132,54 +131,44 @@ func (l *Logger) GetLogger(category string, formatter ...Formatter) *Logger {
 	return &Logger{l.coreLogger, category, l.Formatter}
 }
 
-// Emergency logs a message indicating the system is unusable.
-// Please refer to Error() for how to use this method.
-func (l *Logger) Emergency(format string, a ...interface{}) {
-	l.Log(LevelEmergency, format, a...)
-}
-
-// Alert logs a message indicating action must be taken immediately.
-// Please refer to Error() for how to use this method.
-func (l *Logger) Alert(format string, a ...interface{}) {
-	l.Log(LevelAlert, format, a...)
-}
-
-// Critical logs a message indicating critical conditions.
-// Please refer to Error() for how to use this method.
-func (l *Logger) Critical(format string, a ...interface{}) {
-	l.Log(LevelCritical, format, a...)
+// Panic logs a message indicating the system is dying.
+func (l *Logger) Panic(format string, a ...interface{}) {
+	l.Log(LevelPanic, format, a...)
 }
 
 // Error logs a message indicating an error condition.
-// This method takes one or multiple parameters. If a single parameter
-// is provided, it will be treated as the log message. If multiple parameters
-// are provided, they will be passed to fmt.Sprintf() to generate the log message.
+// This method takes one or multiple parameters. If a
+// single parameter is provided, it IS the log message.
+// If multiple parameters are provided, they are passed
+// to fmt.Sprintf() to generate the log message.
 func (l *Logger) Error(format string, a ...interface{}) {
 	l.Log(LevelError, format, a...)
 }
 
 // Warning logs a message indicating a warning condition.
-// Please refer to Error() for how to use this method.
 func (l *Logger) Warning(format string, a ...interface{}) {
 	l.Log(LevelWarning, format, a...)
 }
 
-// Notice logs a message meaning normal but significant condition.
-// Please refer to Error() for how to use this method.
-func (l *Logger) Notice(format string, a ...interface{}) {
-	l.Log(LevelNotice, format, a...)
+// Success logs a message indicating a success condition.
+func (l *Logger) Success(format string, a ...interface{}) {
+	l.Log(LevelSuccess, format, a...)
 }
 
-// Info logs a message for informational purpose.
-// Please refer to Error() for how to use this method.
+// Info logs a message for a normal but meaningful condition.
 func (l *Logger) Info(format string, a ...interface{}) {
 	l.Log(LevelInfo, format, a...)
 }
 
-// Debug logs a message for debugging purpose.
+// Progress logs a message for how things are progressing.
+func (l *Logger) Progress(format string, a ...interface{}) {
+	l.Log(LevelProgress, format, a...)
+}
+
+// Dbg logs a message for debugging purpose.
 // Please refer to Error() for how to use this method.
-func (l *Logger) Debug(format string, a ...interface{}) {
-	l.Log(LevelDebug, format, a...)
+func (l *Logger) Dbg(format string, a ...interface{}) {
+	l.Log(LevelDbg, format, a...)
 }
 
 // Log logs a message of a specified severity level.
@@ -272,7 +261,9 @@ func (l *coreLogger) Close() {
 
 // DefaultFormatter is the default formatter used to format every log message.
 func DefaultFormatter(l *Logger, e *Entry) string {
-	return fmt.Sprintf("%v [%v][%v] %v%v", e.Time.Format(time.RFC3339), e.Level, e.Category, e.Message, e.CallStack)
+	return fmt.Sprintf("%s %s[%.4s][%s] %v%v",
+		e.Time.Format("01-02-15.04.05"),
+		EmojiOfLevel(e.Level), e.Level, e.Category, e.Message, e.CallStack)
 }
 
 // GetCallStack returns the current call stack information as a string.
