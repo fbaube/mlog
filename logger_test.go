@@ -146,8 +146,8 @@ func TestLoggerConfig(t *testing.T) {
 	if err := c.Configure(logger, "Logger"); err != nil {
 		t.Errorf("config.Configure(logger): %v", err)
 	}
-	if logger.MaxLevel != log.LevelCritical {
-		t.Errorf("logger.MaxLevel = %v, expected %v", logger.MaxLevel, log.LevelCritical)
+	if logger.MaxLevel != log.LevelPanic {
+		t.Errorf("logger.MaxLevel = %v, expected %v", logger.MaxLevel, log.LevelPanic)
 	}
 	if logger.Category != "app2" {
 		t.Errorf("logger.Category = %v, expected %v", logger.Category, "app2")
