@@ -5,6 +5,9 @@
 // Package log implements logging with severity levels and message categories.
 package log
 
+// TODO: If "app" is default, can be omitted from log msgs.
+// if is category, and filterable, then use for go pkg name, or for input file name.
+
 import (
 	"bytes"
 	"errors"
@@ -72,14 +75,31 @@ type Target interface {
 	// Open prepares the target for processing log messages.
 	// Called when Logger.Open() is called.
 	// If an error is returned, the target will be removed from the logger.
-	// errWriter should be used to write errors found while processing log messages.
+	// errWriter should be used to write errors found while processing log
+	// messages, and should probably default to Stderr.
 	Open(errWriter io.Writer) error
 	// Process processes an incoming log message.
 	Process(*Entry)
 	// Close closes a target.
-	// Called when Logger.Close() is called; each target gets
+	// Called when Logger.Close() is called. Each target gets
 	// a chance to flush its log messages to its destination.
 	Close()
+}
+
+// DetailTarget represents a target where the logger can
+// open a set of messages that provide ignorable detail.
+// In a Console target, do this by omitting the first three
+// characters of the timestamp, so providing visual indenting.
+// In an HTML target, do this by opening a "<details> block"
+// and providing the <summary> element, and then subsequent
+// log messages can be written to the body of the <details>
+// element (separated by <br/> tags) until the <details> is
+// closed. As an enhancement, a details block tracks its max
+// notification (error) level, and write a summary at the end.
+type DetailsTarget interface {
+	Target
+	StartDetailsBlock(*Entry)
+	CloseDetailsBlock(string)
 }
 
 // coreLogger maintains the log messages in a channel and sends them to various targets.
@@ -265,10 +285,11 @@ func DefaultFormatter(l *Logger, e *Entry) string {
 	if len(sL) != 5 {
 		sL = sL[0:4]
 	}
+	sTime := e.Time.Format("15.04.05") // e.Time.Format("01-02-15.04.05")
+
 	return fmt.Sprintf("%s %s[%s][%s] %v%v",
-		// e.Time.Format("01-02-15.04.05"),
-		e.Time.Format("15.04.05"), EmojiOfLevel(e.Level),
-		sL /* e.Level */, e.Category, e.Message, e.CallStack)
+		sTime, EmojiOfLevel(e.Level), sL, // e.Level
+		e.Category, e.Message, e.CallStack)
 }
 
 // GetCallStack returns the current call stack information as a string.
