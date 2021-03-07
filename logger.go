@@ -84,18 +84,33 @@ type Target interface {
 	// Called when Logger.Close() is called. Each target gets
 	// a chance to flush its log messages to its destination.
 	Close()
+	// Flush is NEW and added so that logging plays nicely with
+	// other sources of text.
+	Flush()
+	// DoesDetails is NEW and has a value per-struct, not per-instance.
+	DoesDetails() bool
 }
 
-// DetailTarget represents a target where the logger can
-// open a set of messages that provide ignorable detail.
+// DetailTarget is a target where the logger can open a set
+// of log messages that provide collapsible, ignorable detail.
+//
 // In a Console target, do this by omitting the first three
 // characters of the timestamp, so providing visual indenting.
-// In an HTML target, do this by opening a "<details> block"
-// and providing the <summary> element, and then subsequent
-// log messages can be written to the body of the <details>
-// element (separated by <br/> tags) until the <details> is
-// closed. As an enhancement, a details block tracks its max
-// notification (error) level, and write a summary at the end.
+//
+// In an HTML target, do this by opening a "<details> block" and
+// with the same log message, providing the <summary>  element.
+// Then subsequent log messages can be written to the body of
+// the <details> element (separated by <br/> tags, rather than
+// by newlines as in most log targets) until the <details>
+// element is closed.
+//
+// As an enhancement, a details block tracks its minimum (i.e.)
+// most severe) notification level, and summarize at the end.
+//
+// The two function calls could be ignored as no-ops by targets
+// that do not implemement the interface. However it is simple
+// and clear just to have the two calls implemented if and only
+// if the struct returns true for DoesDetails().
 type DetailsTarget interface {
 	Target
 	StartDetailsBlock(*Entry)
@@ -279,6 +294,19 @@ func (l *coreLogger) Close() {
 	}
 }
 
+// Flush flushes the logger and the targets.
+func (l *coreLogger) Flush() {
+	if !l.open {
+		return
+	}
+	l.open = false
+	// use a nil entry to signal the close of logger
+	// l.entries <- nil
+	for _, target := range l.Targets {
+		target.Flush()
+	}
+}
+
 // DefaultFormatter is the default formatter used to format every log message.
 func DefaultFormatter(l *Logger, e *Entry) string {
 	sL := e.Level.String()
@@ -287,9 +315,10 @@ func DefaultFormatter(l *Logger, e *Entry) string {
 	}
 	sTime := e.Time.Format("15.04.05") // e.Time.Format("01-02-15.04.05")
 
-	return fmt.Sprintf("%s %s[%s][%s] %v%v",
-		sTime, EmojiOfLevel(e.Level), sL, // e.Level
-		e.Category, e.Message, e.CallStack)
+	// return fmt.Sprintf("%s %s[%s][%s] %v%v",
+	return fmt.Sprintf("%s %s[%s] %v%v",
+		sTime, EmojiOfLevel(e.Level), sL, //e.Level, e.Category,
+		e.Message, e.CallStack)
 }
 
 // GetCallStack returns the current call stack information as a string.

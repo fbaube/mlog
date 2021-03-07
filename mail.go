@@ -82,6 +82,15 @@ func (t *MailTarget) Close() {
 	<-t.close
 }
 
+// Flush is a no-op.
+func (t *MailTarget) Flush() {
+	// <-t.close
+}
+
+func (t *MailTarget) DoesDetails() bool {
+	return false
+}
+
 func (t *MailTarget) sendMessages(errWriter io.Writer) {
 	auth := smtp.PlainAuth(
 		"",

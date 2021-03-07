@@ -93,6 +93,15 @@ func (t *NetworkTarget) Close() {
 	<-t.close
 }
 
+// Flush is a no-op.
+func (t *NetworkTarget) Flush() {
+	// <-t.close
+}
+
+func (t *NetworkTarget) DoesDetails() bool {
+	return false
+}
+
 func (t *NetworkTarget) connect() error {
 	if t.conn != nil {
 		t.conn.Close()

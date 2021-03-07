@@ -85,3 +85,19 @@ func (t *ConsoleTarget) Process(e *Entry) {
 func (t *ConsoleTarget) Close() {
 	<-t.close
 }
+
+// Flush is a no-op.
+func (t *ConsoleTarget) Flush() {
+}
+
+func (t *ConsoleTarget) DoesDetails() bool {
+	return true
+}
+
+func (t *ConsoleTarget) StartDetailsBlock(*Entry) {
+	fmt.Fprintln(t.Writer, "NOT IMPLEMENTED YET: ConsoleTarget.StartDetailsBlock")
+}
+
+func (t *ConsoleTarget) CloseDetailsBlock(string) {
+	fmt.Fprintln(t.Writer, "NOT IMPLEMENTED YET: ConsoleTarget.CloseDetailsBlock")
+}

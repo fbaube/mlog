@@ -96,6 +96,23 @@ func (t *FileTarget) Close() {
 	<-t.close
 }
 
+// Flush is a no-op but SHOULD have a call to flush the file.
+func (t *FileTarget) Flush() {
+	// t.fd.Flush()
+}
+
+func (t *FileTarget) DoesDetails() bool {
+	return true
+}
+
+func (t *FileTarget) StartDetailsBlock(*Entry) {
+	fmt.Fprintln(t.fd, "NOT IMPLEMENTED YET: FileTarget.StartDetailsBlock")
+}
+
+func (t *FileTarget) CloseDetailsBlock(string) {
+	fmt.Fprintln(t.fd, "NOT IMPLEMENTED YET: FileTarget.CloseDetailsBlock")
+}
+
 func (t *FileTarget) rotate(bytes int64) {
 	if t.currentBytes+bytes <= t.MaxBytes || bytes > t.MaxBytes {
 		return
