@@ -16,8 +16,11 @@ mlog (multi-logger) is a fork of github.com/go-ozzo/ozzo-log (MIT license).
 
 It has these mods and enhancements:
 
+* A default logger, named `L`
 * HtmlSimple logger target, which send to an HTML element ID, and converts every newline to `<br/>`
 * Emojis for each logging level, added at the start of each log message 
+* An enhanced target `DetailsTarget` that can generate lists of nested log messages 
+* A rethinking of RFC5424, such that there are four related message statuses: in increasing order of severity they are Info (grey), Success (green), Warning (yellow, and Error (red)
 
 _(resume old README)_
 
