@@ -23,6 +23,13 @@ import (
 // Level describes the level of a log message.
 type Level int
 
+// L is the predefined default global logger.
+var L *Logger
+
+func init() {
+	L = NewLogger()
+}
+
 // RFC5424 log message levels.
 const (
 	LevelPanic    Level = iota + 2
