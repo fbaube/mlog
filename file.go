@@ -31,6 +31,17 @@ type FileTarget struct {
 	currentBytes int64
 	errWriter    io.Writer
 	close        chan bool
+
+	Category    string
+	Subcategory string
+}
+
+func (t *FileTarget) SetCategory(s string) {
+	t.Category = s
+}
+
+func (t *FileTarget) SetSubcategory(s string) {
+	t.Subcategory = s
 }
 
 // NewFileTarget creates a FileTarget.

@@ -62,11 +62,12 @@ func (l Level) String() string {
 
 // Entry represents a log entry.
 type Entry struct {
-	Level     Level
-	Category  string
-	Message   string
-	Time      time.Time
-	CallStack string
+	Level       Level
+	Category    string
+	Subcategory string // NEW
+	Message     string
+	Time        time.Time
+	CallStack   string
 
 	FormattedMessage string
 }
@@ -80,7 +81,7 @@ func (e *Entry) String() string {
 // send log messages to for further processing.
 type Target interface {
 	// Open prepares the target for processing log messages.
-	// Called when Logger.Open() is called.
+	// Called when Logger.Open() is calle§d.
 	// If an error is returned, the target will be removed from the logger.
 	// errWriter should be used to write errors found while processing log
 	// messages, and should probably default to Stderr.
@@ -96,6 +97,10 @@ type Target interface {
 	Flush()
 	// DoesDetails is NEW and has a value per-struct, not per-instance.
 	DoesDetails() bool
+	// SetCategory is NEW and has a value per-Contentity.
+	SetCategory(string)
+	// SetSubcategory is NEW and has a value per- Contentity processing stage.
+	SetSubcategory(string)
 }
 
 // DetailTarget is a target where the logger can open a set
@@ -120,8 +125,13 @@ type Target interface {
 // if the struct returns true for DoesDetails().
 type DetailsTarget interface {
 	Target
-	StartDetailsBlock(*Entry)
+	StartDetailsBlock(string, *Entry) // Category is e.g. "[01]" and clear Subcat
 	CloseDetailsBlock(string)
+}
+
+type DetailsInfo struct {
+	InDetails bool
+	MinLevel  Level
 }
 
 // coreLogger maintains the log messages in a channel and sends them to various targets.
@@ -159,7 +169,7 @@ func NewLogger() *Logger {
 		MaxLevel:    LevelDbg,
 		Targets:     make([]Target, 0),
 	}
-	return &Logger{logger, "app", DefaultFormatter}
+	return &Logger{logger, "", DefaultFormatter}
 }
 
 // GetLogger creates a logger with the specified category and log formatter.
@@ -306,25 +316,51 @@ func (l *coreLogger) Flush() {
 	if !l.open {
 		return
 	}
-	l.open = false
-	// use a nil entry to signal the close of logger
-	// l.entries <- nil
 	for _, target := range l.Targets {
 		target.Flush()
 	}
 }
 
+// SetCategory is duh.
+func (l *coreLogger) SetCategory(s string) {
+	if !l.open {
+		return
+	}
+	for _, target := range l.Targets {
+		target.SetCategory(s)
+	}
+}
+
+// SetSubcategory is duh.
+func (l *coreLogger) SetSubcategory(s string) {
+	if !l.open {
+		return
+	}
+	for _, target := range l.Targets {
+		target.SetSubcategory(s)
+	}
+}
+
 // DefaultFormatter is the default formatter used to format every log message.
 func DefaultFormatter(l *Logger, e *Entry) string {
-	sL := e.Level.String()
-	if len(sL) != 5 {
-		sL = sL[0:4]
+	var sLvl, sCtg string
+	sLvl = e.Level.String()
+	if len(sLvl) != 5 {
+		sLvl = sLvl[0:4]
 	}
 	sTime := e.Time.Format("15.04.05") // e.Time.Format("01-02-15.04.05")
 
-	// return fmt.Sprintf("%s %s[%s][%s] %v%v",
-	return fmt.Sprintf("%s %s[%s] %v%v",
-		sTime, EmojiOfLevel(e.Level), sL, //e.Level, e.Category,
+	if e.Subcategory != "" {
+		// sCtg = fmt.Sprintf("[%s:%s]", e.Category, e.Subcategory)
+		sCtg = "[" + e.Category + ":" + e.Subcategory + "]"
+	} else if e.Category != "" {
+		// sCtg = fmt.Sprintf("[%s]", e.Category)
+		sCtg = "[" + e.Category + "]"
+	} else {
+		sCtg = ""
+	}
+	return fmt.Sprintf("%s %s[%s]%s %v %v",
+		sTime, EmojiOfLevel(e.Level), sLvl, sCtg,
 		e.Message, e.CallStack)
 }
 

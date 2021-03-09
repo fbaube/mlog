@@ -36,6 +36,17 @@ type ConsoleTarget struct {
 	ColorMode bool      // whether to use colors to differentiate log levels
 	Writer    io.Writer // the writer to write log messages
 	close     chan bool
+	DetailsInfo
+	Category    string
+	Subcategory string
+}
+
+func (t *ConsoleTarget) SetCategory(s string) {
+	t.Category = s
+}
+
+func (t *ConsoleTarget) SetSubcategory(s string) {
+	t.Subcategory = s
 }
 
 // NewConsoleTarget creates a ConsoleTarget.
