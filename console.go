@@ -21,7 +21,7 @@ func newConsoleBrush(format string) consoleBrush {
 }
 
 var brushes = map[Level]consoleBrush{
-	LevelDbg:      newConsoleBrush("39"),   // default
+	LevelDbg:      newConsoleBrush("1;36"), // bold cyan
 	LevelProgress: newConsoleBrush("36"),   // cyan
 	LevelInfo:     newConsoleBrush("36"),   // cyan
 	LevelSuccess:  newConsoleBrush("32"),   // green
