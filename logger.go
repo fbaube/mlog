@@ -35,10 +35,13 @@ const (
 	LevelPanic    Level = iota + 2
 	LevelError          // 3
 	LevelWarning        // 4
-	LevelSuccess        // 5
+	LevelOkay           // 5
 	LevelInfo           // 6
 	LevelProgress       // 7
 	LevelDbg            // misspelled cos 8 != RFC5424 "7"
+	//
+	// Utility levels for fancier console output
+	GreenBG
 )
 
 // LevelNames maps log levels to names
@@ -46,7 +49,7 @@ var LevelNames = map[Level]string{
 	LevelDbg:      "Debug",
 	LevelProgress: "Progress",
 	LevelInfo:     "Info",
-	LevelSuccess:  "Success",
+	LevelOkay:     "Okay",
 	LevelWarning:  "Warning",
 	LevelError:    "Error",
 	LevelPanic:    "PANIC",
@@ -103,35 +106,43 @@ type Target interface {
 	SetSubcategory(string)
 }
 
-// DetailTarget is a target where the logger can open a set
-// of log messages that provide collapsible, ignorable detail.
+// DetailTarget is a target where the logger can both
+// (1) Open a collapsible, ignorable set of log messages, and
+// (2) Quote a collapsible, ignorable block of text.
 //
 // In a Console target, do this by omitting the first three
 // characters of the timestamp, so providing visual indenting.
+// For (1) use " - " or " * ", so that it resembles a list.
+// For (2) use " " " or " ' ", so that it is obv a quote.
 //
 // In an HTML target, do this by opening a "<details> block" and
 // with the same log message, providing the <summary>  element.
-// Then subsequent log messages can be written to the body of
-// the <details> element (separated by <br/> tags, rather than
-// by newlines as in most log targets) until the <details>
-// element is closed.
+// Then subsequent log messages or a text block can be written
+// to the body of the <details> element (separated by <br/> tags,
+// rather than by newlines as in most log targets) until the
+// <details> element is closed.
 //
-// As an enhancement, a details block tracks its minimum (i.e.)
-// most severe) notification level, and summarize at the end.
+// As an enhancement, a set of log messages tracks its minimum
+// (i.e.) most severe) notification level, with summary at the end.
 //
-// The two function calls could be ignored as no-ops by targets
+// The four function calls could be ignored as no-ops by targets
 // that do not implemement the interface. However it is simple
-// and clear just to have the two calls implemented if and only
+// and clear just to have the four calls implemented if and only
 // if the struct returns true for DoesDetails().
 type DetailsTarget interface {
 	Target
-	StartDetailsBlock(string, *Entry) // Category is e.g. "[01]" and clear Subcat
-	CloseDetailsBlock(string)
+	StartLogDetailsBlock(string, *Entry) // s = Category e.g. "[01]" and clear Subcat
+	CloseLogDetailsBlock(string)
+	LogTextQuote(*Entry, string)
 }
 
 type DetailsInfo struct {
-	InDetails bool
-	MinLevel  Level
+	AmInDetails,
+	IsLogDetails,
+	IsTextQuote bool
+	MinLogLevel Level
+	Category    string
+	Subcategory string
 }
 
 // coreLogger maintains the log messages in a channel and sends them to various targets.
@@ -202,9 +213,9 @@ func (l *Logger) Warning(format string, a ...interface{}) {
 	l.Log(LevelWarning, format, a...)
 }
 
-// Success logs a message indicating a success condition.
-func (l *Logger) Success(format string, a ...interface{}) {
-	l.Log(LevelSuccess, format, a...)
+// Okay logs a message indicating an okay condition.
+func (l *Logger) Okay(format string, a ...interface{}) {
+	l.Log(LevelOkay, format, a...)
 }
 
 // Info logs a message for a normal but meaningful condition.

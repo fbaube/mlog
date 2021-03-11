@@ -7,15 +7,16 @@ const (
 	EmojiPanic   = "❌"  // 2 X
 	EmojiError   = "❌"  // 3 R
 	EmojiWarning = "🟨"  // 4 Y
-	EmojiSuccess = "✅"  // 5 G
+	EmojOkay     = "🟩"  // 5 G
 	EmojiInfo    = "ℹ️" // 6 I
 	// TRANSIENT
 	EmojiProgress = "▫️" // 7
 	EmojiDbg      = "❓"  // misspelled cos 8 != RFC5424 "7"
-	// STATE INDICATORS
+	/* STATE INDICATORS
 	Red = "🔴"
 	Ylw = "🟡"
 	Grn = "🟢"
+	*/
 ) /* RFC5424:
 0 Emergency (system is unusable)
 1 Alert (take action ASAP)
@@ -36,7 +37,7 @@ func EmojiOfLevel(L Level) string {
 	case 4:
 		return "🟨"
 	case 5:
-		return "✅"
+		return "🟩"
 	case 6:
 		return "💬"
 	case 7:
