@@ -44,9 +44,9 @@ const (
 	GreenBG
 )
 
-// LevelNames maps log levels to names
+// LevelNames maps log levels to user-frenly names
 var LevelNames = map[Level]string{
-	LevelDbg:      "Debug",
+	LevelDbg:      "?Dbg",
 	LevelProgress: "Progress",
 	LevelInfo:     "Info",
 	LevelOkay:     "Okay",
@@ -65,13 +65,11 @@ func (l Level) String() string {
 
 // Entry represents a log entry.
 type Entry struct {
-	Level       Level
-	Category    string
-	Subcategory string // NEW
-	Message     string
-	Time        time.Time
-	CallStack   string
-
+	Level            Level
+	Category         string
+	Message          string
+	Time             time.Time
+	CallStack        string
 	FormattedMessage string
 }
 
@@ -100,63 +98,22 @@ type Target interface {
 	Flush()
 	// DoesDetails is NEW and has a value per-struct, not per-instance.
 	DoesDetails() bool
-	// SetCategory is NEW and has a value per-Contentity.
-	SetCategory(string)
-	// SetSubcategory is NEW and has a value per- Contentity processing stage.
-	SetSubcategory(string)
-}
-
-// DetailTarget is a target where the logger can both
-// (1) Open a collapsible, ignorable set of log messages, and
-// (2) Quote a collapsible, ignorable block of text.
-//
-// In a Console target, do this by omitting the first three
-// characters of the timestamp, so providing visual indenting.
-// For (1) use " - " or " * ", so that it resembles a list.
-// For (2) use " " " or " ' ", so that it is obv a quote.
-//
-// In an HTML target, do this by opening a "<details> block" and
-// with the same log message, providing the <summary>  element.
-// Then subsequent log messages or a text block can be written
-// to the body of the <details> element (separated by <br/> tags,
-// rather than by newlines as in most log targets) until the
-// <details> element is closed.
-//
-// As an enhancement, a set of log messages tracks its minimum
-// (i.e.) most severe) notification level, with summary at the end.
-//
-// The four function calls could be ignored as no-ops by targets
-// that do not implemement the interface. However it is simple
-// and clear just to have the four calls implemented if and only
-// if the struct returns true for DoesDetails().
-type DetailsTarget interface {
-	Target
-	StartLogDetailsBlock(string, *Entry) // s = Category e.g. "[01]" and clear Subcat
-	CloseLogDetailsBlock(string)
-	LogTextQuote(*Entry, string)
-}
-
-type DetailsInfo struct {
-	AmInDetails,
-	IsLogDetails,
-	IsTextQuote bool
-	MinLogLevel Level
-	Category    string
-	Subcategory string
 }
 
 // coreLogger maintains the log messages in a channel and sends them to various targets.
 type coreLogger struct {
-	lock    sync.Mutex
-	open    bool        // whether the logger is open
-	entries chan *Entry // log entries
+	lock        sync.Mutex
+	open        bool        // whether the logger is open
+	entries     chan *Entry // log entries
+	ErrorWriter io.Writer   // the writer to record errors caused by log targets
 
-	ErrorWriter     io.Writer // the writer used to write errors caused by log targets
-	BufferSize      int       // the size of the channel storing log entries
-	CallStackDepth  int       // the number of call stack frames to be logged for each message. 0 means do not log any call stack frame.
-	CallStackFilter string    // a substring that a call stack frame file path should contain in order for the frame to be counted
-	MaxLevel        Level     // the maximum level of messages to be logged
-	Targets         []Target  // targets for sending log messages to
+	BufferSize     int // the size of the channel storing log entries
+	CallStackDepth int // the number of call stack frames to log for each
+	//                 // message. 0 means do not log any call stack frame.
+	CallStackFilter string // a substring that a call stack frame filepath
+	//                     // should contain in order for the frame to be counted
+	MaxLevel Level    // the maximum level of messages to be logged
+	Targets  []Target // targets for sending log messages to
 }
 
 // Formatter formats a log message into an appropriate string.
@@ -256,6 +213,28 @@ func (l *Logger) Log(level Level, format string, a ...interface{}) {
 	l.entries <- entry
 }
 
+func (l *Logger) LogWithString(level Level, format string, special string, a ...interface{}) {
+	// func (l *Logger) Log(level Level, format string, a ...interface{}) {
+	if level > l.MaxLevel || !l.open {
+		return
+	}
+	message := format
+	if len(a) > 0 {
+		message = fmt.Sprintf(format, a...)
+	}
+	entry := &Entry{
+		Category: l.Category,
+		Level:    level,
+		Message:  "(" + special + ") " + message,
+		Time:     time.Now(),
+	}
+	if l.CallStackDepth > 0 {
+		entry.CallStack = GetCallStack(3, l.CallStackDepth, l.CallStackFilter)
+	}
+	entry.FormattedMessage = l.Formatter(l, entry)
+	l.entries <- entry
+}
+
 // Open prepares the logger and the targets for logging purpose.
 // Open must be called before any message can be logged.
 func (l *coreLogger) Open() error {
@@ -265,7 +244,6 @@ func (l *coreLogger) Open() error {
 	if l.open {
 		return nil
 	}
-
 	if l.ErrorWriter == nil {
 		return errors.New("Logger.ErrorWriter must be set.")
 	}
@@ -275,7 +253,6 @@ func (l *coreLogger) Open() error {
 	if l.CallStackDepth < 0 {
 		return errors.New("Logger.CallStackDepth must be no less than 0.")
 	}
-
 	l.entries = make(chan *Entry, l.BufferSize)
 	var targets []Target
 	for _, target := range l.Targets {
@@ -286,11 +263,8 @@ func (l *coreLogger) Open() error {
 		}
 	}
 	l.Targets = targets
-
 	go l.process()
-
 	l.open = true
-
 	return nil
 }
 
@@ -332,43 +306,17 @@ func (l *coreLogger) Flush() {
 	}
 }
 
-// SetCategory is duh.
-func (l *coreLogger) SetCategory(s string) {
-	if !l.open {
-		return
-	}
-	for _, target := range l.Targets {
-		target.SetCategory(s)
-	}
-}
-
-// SetSubcategory is duh.
-func (l *coreLogger) SetSubcategory(s string) {
-	if !l.open {
-		return
-	}
-	for _, target := range l.Targets {
-		target.SetSubcategory(s)
-	}
-}
-
 // DefaultFormatter is the default formatter used to format every log message.
+// This formatter assumes no Target is a DetailsTarget.
 func DefaultFormatter(l *Logger, e *Entry) string {
-	var sLvl, sCtg string
+	var sTime, sLvl, sCtg string
 	sLvl = e.Level.String()
 	if len(sLvl) != 5 {
 		sLvl = sLvl[0:4]
 	}
-	sTime := e.Time.Format("15.04.05") // e.Time.Format("01-02-15.04.05")
-
-	if e.Subcategory != "" {
-		// sCtg = fmt.Sprintf("[%s:%s]", e.Category, e.Subcategory)
-		sCtg = "[" + e.Category + ":" + e.Subcategory + "]"
-	} else if e.Category != "" {
-		// sCtg = fmt.Sprintf("[%s]", e.Category)
-		sCtg = "[" + e.Category + "]"
-	} else {
-		sCtg = ""
+	sTime = e.Time.Format("15.04.05") // e.Time.Format("01-02-15.04.05")
+	if e.Category != "" {
+		sCtg = fmt.Sprintf("[%s]", e.Category)
 	}
 	return fmt.Sprintf("%s %s[%s]%s %v %v",
 		sTime, EmojiOfLevel(e.Level), sLvl, sCtg,

@@ -13,9 +13,15 @@ import (
 	S "strings"
 )
 
-type consoleBrush func(string) string
+// StrInStrOut is String In, String Out. In this app,
+// a ControlSequenceTextBrush StrInStrOut wraps simple
+// text in console control characters to apply color and
+// effects, and then resets them at the end of the text.
+type StrInStrOut func(string) string
 
-func newConsoleBrush(format string) consoleBrush {
+type ControlSequenceTextBrush StrInStrOut
+
+func newControlSequenceTextBrush(format string) ControlSequenceTextBrush {
 	return func(text string) string {
 		return "\033[" + format + "m" + text + "\033[0m"
 	}
@@ -37,20 +43,19 @@ Bold   ;1
 Dim    ;2
 Italic ;3
 Undrln ;4
-
 Rvrsd  ;7
 Strkthru ;9
 */
 
-var Brushes = map[Level]consoleBrush{
-	LevelDbg:      newConsoleBrush("1;36"),   // bold cyan
-	LevelProgress: newConsoleBrush("36"),     // cyan
-	LevelInfo:     newConsoleBrush("36"),     // cyan
-	LevelOkay:     newConsoleBrush("32"),     // green
-	LevelWarning:  newConsoleBrush("33"),     // yellow
-	LevelError:    newConsoleBrush("31"),     // red
-	LevelPanic:    newConsoleBrush("1;95"),   // bold light magenta
-	GreenBG:       newConsoleBrush("42;2;4"), // green background
+var CtlSeqTextBrushes = map[Level]ControlSequenceTextBrush{
+	LevelDbg:      newControlSequenceTextBrush("30;2"),   // grey
+	LevelProgress: newControlSequenceTextBrush("36"),     // cyan
+	LevelInfo:     newControlSequenceTextBrush("36"),     // cyan
+	LevelOkay:     newControlSequenceTextBrush("32"),     // green
+	LevelWarning:  newControlSequenceTextBrush("31"),     // red
+	LevelError:    newControlSequenceTextBrush("31;1"),   // bold red
+	LevelPanic:    newControlSequenceTextBrush("1;95"),   // bold light magenta
+	GreenBG:       newControlSequenceTextBrush("42;2;4"), // green background
 }
 
 // ConsoleTarget writes filtered log messages to console window.
@@ -59,9 +64,7 @@ type ConsoleTarget struct {
 	ColorMode   bool      // whether to use colors to differentiate log levels
 	Writer      io.Writer // the writer to write log messages
 	close       chan bool
-	DetailsInfo        // NEW
-	Category    string // NEW
-	Subcategory string // NEW
+	DetailsInfo // NEW
 }
 
 func (t *ConsoleTarget) SetCategory(s string) {
@@ -81,6 +84,9 @@ func NewConsoleTarget() *ConsoleTarget {
 		ColorMode: true,
 		Writer:    os.Stdout,
 		close:     make(chan bool, 0),
+		DetailsInfo: DetailsInfo{
+			DetailsFormatter: DefaultDetailsFormatter,
+		},
 	}
 }
 
@@ -108,7 +114,7 @@ func (t *ConsoleTarget) Process(e *Entry) {
 	msg := e.String()
 	if t.ColorMode {
 		if !S.Contains(msg, "\033[") {
-			brush, ok := Brushes[e.Level]
+			brush, ok := CtlSeqTextBrushes[e.Level]
 			if ok {
 				msg = brush(msg)
 			}
