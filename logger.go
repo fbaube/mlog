@@ -318,9 +318,9 @@ func DefaultFormatter(l *Logger, e *Entry) string {
 	if e.Category != "" {
 		sCtg = fmt.Sprintf("[%s]", e.Category)
 	}
-	return fmt.Sprintf("%s %s[%s]%s %v %v",
-		sTime, EmojiOfLevel(e.Level), sLvl, sCtg,
-		e.Message, e.CallStack)
+	return fmt.Sprintf("%s %s%s"+ /*[%s]*/ "%s %v %v",
+		sTime, EmojiOfLevel(e.Level), EmojiOfLevel(e.Level), // sLvl,
+		sCtg, e.Message, e.CallStack)
 }
 
 // GetCallStack returns the current call stack information as a string.
