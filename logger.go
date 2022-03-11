@@ -26,6 +26,11 @@ type Level int
 // L is the predefined default global logger.
 var L *Logger
 
+// pCoreLogger is a cheat so that we can set max logging level globally.
+var pCoreLogger *Logger 
+
+// init calls NewLogger() to create a root logger.
+// The root logger is os.Stderr, LevelDebug. 
 func init() {
 	L = NewLogger()
 }
@@ -82,10 +87,10 @@ func (e *Entry) String() string {
 // send log messages to for further processing.
 type Target interface {
 	// Open prepares the target for processing log messages.
-	// Called when Logger.Open() is calle§d.
-	// If an error is returned, the target will be removed from the logger.
-	// errWriter should be used to write errors found while processing log
-	// messages, and should probably default to Stderr.
+	// Called when Logger.Open() is called.
+	// If an error is returned, the target will be removed from the 
+	// logger. errWriter should be used to write errors found while 
+	// processing log messages, and should probably default to Stderr.
 	Open(errWriter io.Writer) error
 	// Process processes an incoming log message.
 	Process(*Entry)
@@ -137,7 +142,8 @@ func NewLogger() *Logger {
 		MaxLevel:    LevelDbg,
 		Targets:     make([]Target, 0),
 	}
-	return &Logger{logger, "", DefaultFormatter}
+	pCoreLogger = &Logger{logger, "", DefaultFormatter} 
+	return pCoreLogger // &Logger{logger, "", DefaultFormatter}
 }
 
 // GetLogger creates a logger with the specified category and log formatter.
@@ -233,6 +239,10 @@ func (l *Logger) LogWithString(level Level, format string, special string, a ...
 	}
 	entry.FormattedMessage = l.Formatter(l, entry)
 	l.entries <- entry
+}
+
+func SetMaxLevel(lvl Level) {
+	pCoreLogger.MaxLevel = lvl
 }
 
 // Open prepares the logger and the targets for logging purpose.

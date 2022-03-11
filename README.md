@@ -12,15 +12,38 @@
 
 ## Description
 -->
-mlog (multi-logger) is a fork of github.com/go-ozzo/ozzo-log (MIT-licensed).
 
-It has these modificationss and enhancements:
+mlog (multi-logger) is a fork of `github.com/go-ozzo/ozzo-log` (MIT-licensed).
 
-* A default logger, named `L`, so that a simple app need not pass around logger arguments 
-* A new logger target `HtmlSimple`, which logs to an HTML element ID, and ends every log message with (not newline but) `<br/>`
-* An emojis for each logging level, added at the start of each log message in every logger target type (because emoji are _everywhere_)
-* An new enhanced logger target interface `DetailsTarget` that can generate lists of nested log messages, which lists should be collapsible 
-* A variation on RFC5424, such that there are four related message statuses: in increasing order of severity they are Info (grey), Success (green), Warning (yellow, and Error (red); also Debug, Progress, Panic
+It has these modifications and enhancements:
+
+* A default logger, named `L`, so that a simple app need not pass around
+logger arguments 
+* Each logging level has both a distinct color, and a distinct _emoji_
+added at the start of each log message (because emoji are easily to scan
+for, and are used _everywhere_)
+* A variation on RFC5424, such that there are four related message statuses,
+in increasing order of severity: Info (grey), Okay (green), Warning (yellow),
+and Error (red); these should be used so that they are about the same level
+of importance but with distinct stats indications, much like traffic lights
+* _(work in progress)_ A new logger target `HtmlSimple`, which logs to an
+HTML element ID, and ends every log message with (not newline but) `<br/>`
+* _(work in progress)_ A new enhanced logger target interface `DetailsTarget`
+that can generate lists of nested log messages, which lists should be
+collapsible 
+
+```
+    This     RFC5424
+0    -       Emergency (system is unusable)
+1    -       Alert (take action ASAP)
+2   Panic    Critical
+3   Error    Error
+4   Warning  Warning
+5   Okay     Notice (normal but significant condition)
+6   Info     Informational
+7   Progress Debug
+8   Dbg      (none)
+```
 
 _*(resume old README)*_
 
