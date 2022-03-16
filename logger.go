@@ -157,7 +157,8 @@ func (l *Logger) GetLogger(category string, formatter ...Formatter) *Logger {
 	return &Logger{l.coreLogger, category, l.Formatter}
 }
 
-// Panic logs a message indicating the system is dying.
+// Panic logs a message indicating the system is dying, 
+// but does NOT actually execute a call to panic(..)
 func (l *Logger) Panic(format string, a ...interface{}) {
 	l.Log(LevelPanic, format, a...)
 }
