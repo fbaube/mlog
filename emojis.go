@@ -34,7 +34,7 @@ const (
 func EmojiOfLevel(L Level) string {
 	switch L {
 	case 0, 1, 2:
-		return "💀❌💀"
+		return "❌💀❌"
 	case 3:
 		return "❌"
 	case 4:
