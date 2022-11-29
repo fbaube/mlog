@@ -27,10 +27,10 @@ type Level int
 var L *Logger
 
 // pCoreLogger is a cheat so that we can set max logging level globally.
-var pCoreLogger *Logger 
+var pCoreLogger *Logger
 
 // init calls NewLogger() to create a root logger.
-// The root logger is os.Stderr, LevelDebug. 
+// The root logger is os.Stderr, LevelDebug.
 func init() {
 	L = NewLogger()
 }
@@ -88,8 +88,8 @@ func (e *Entry) String() string {
 type Target interface {
 	// Open prepares the target for processing log messages.
 	// Called when Logger.Open() is called.
-	// If an error is returned, the target will be removed from the 
-	// logger. errWriter should be used to write errors found while 
+	// If an error is returned, the target will be removed from the
+	// logger. errWriter should be used to write errors found while
 	// processing log messages, and should probably default to Stderr.
 	Open(errWriter io.Writer) error
 	// Process processes an incoming log message.
@@ -142,7 +142,20 @@ func NewLogger() *Logger {
 		MaxLevel:    LevelDbg,
 		Targets:     make([]Target, 0),
 	}
-	pCoreLogger = &Logger{logger, "", DefaultFormatter} 
+	pCoreLogger = &Logger{logger, "", DefaultFormatter}
+	return pCoreLogger // &Logger{logger, "", DefaultFormatter}
+}
+
+// NewNullLogger creates a no-op logger.
+// .
+func NewNullLogger() *Logger {
+	logger := &coreLogger{
+		ErrorWriter: io.Discard,
+		BufferSize:  1024,
+		MaxLevel:    LevelError,
+		Targets:     make([]Target, 0),
+	}
+	pCoreLogger = &Logger{logger, "", DefaultFormatter}
 	return pCoreLogger // &Logger{logger, "", DefaultFormatter}
 }
 
@@ -157,7 +170,7 @@ func (l *Logger) GetLogger(category string, formatter ...Formatter) *Logger {
 	return &Logger{l.coreLogger, category, l.Formatter}
 }
 
-// Panic logs a message indicating the system is dying, 
+// Panic logs a message indicating the system is dying,
 // but does NOT actually execute a call to panic(..)
 func (l *Logger) Panic(format string, a ...interface{}) {
 	l.Log(LevelPanic, format, a...)

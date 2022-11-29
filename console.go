@@ -75,9 +75,10 @@ func (t *ConsoleTarget) SetSubcategory(s string) {
 	t.Subcategory = s
 }
 
-// NewConsoleTarget creates a ConsoleTarget.
+// NewConsoleTarget creates a ConsoleTarget (i.e. Stdout).
 // The new ConsoleTarget takes these default options:
 // MaxLevel: LevelDebug, ColorMode: true, Writer: os.Stdout
+// .
 func NewConsoleTarget() *ConsoleTarget {
 	return &ConsoleTarget{
 		Filter:    &Filter{MaxLevel: LevelDbg},
