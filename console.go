@@ -7,6 +7,7 @@ package log
 import (
 	"errors"
 	"fmt"
+	LU "github.com/fbaube/logutils"
 	"io"
 	"os"
 	"runtime"
@@ -47,15 +48,15 @@ Rvrsd  ;7
 Strkthru ;9
 */
 
-var CtlSeqTextBrushes = map[Level]ControlSequenceTextBrush{
-	LevelDbg:      newControlSequenceTextBrush("30;2"),   // grey
-	LevelProgress: newControlSequenceTextBrush("36"),     // cyan
-	LevelInfo:     newControlSequenceTextBrush("36"),     // cyan
-	LevelOkay:     newControlSequenceTextBrush("32"),     // green
-	LevelWarning:  newControlSequenceTextBrush("31"),     // red
-	LevelError:    newControlSequenceTextBrush("31;1"),   // bold red
-	LevelPanic:    newControlSequenceTextBrush("1;95"),   // bold light magenta
-	GreenBG:       newControlSequenceTextBrush("42;2;4"), // green background
+var CtlSeqTextBrushes = map[LU.Level]ControlSequenceTextBrush{
+	LU.LevelDbg:      newControlSequenceTextBrush("30;2"),   // grey
+	LU.LevelProgress: newControlSequenceTextBrush("36"),     // cyan
+	LU.LevelInfo:     newControlSequenceTextBrush("36"),     // cyan
+	LU.LevelOkay:     newControlSequenceTextBrush("32"),     // green
+	LU.LevelWarning:  newControlSequenceTextBrush("31"),     // red
+	LU.LevelError:    newControlSequenceTextBrush("31;1"),   // bold red
+	LU.LevelPanic:    newControlSequenceTextBrush("1;95"),   // bold light magenta
+	LU.GreenBG:       newControlSequenceTextBrush("42;2;4"), // green background
 }
 
 // ConsoleTarget writes filtered log messages to console window.
@@ -77,11 +78,11 @@ func (t *ConsoleTarget) SetSubcategory(s string) {
 
 // NewConsoleTarget creates a ConsoleTarget (i.e. Stdout).
 // The new ConsoleTarget takes these default options:
-// MaxLevel: LevelDebug, ColorMode: true, Writer: os.Stdout
+// MaxLevel: LU,LevelDebug, ColorMode: true, Writer: os.Stdout
 // .
 func NewConsoleTarget() *ConsoleTarget {
 	return &ConsoleTarget{
-		Filter:    &Filter{MaxLevel: LevelDbg},
+		Filter:    &Filter{MaxLevel: LU.LevelDbg},
 		ColorMode: true,
 		Writer:    os.Stdout,
 		close:     make(chan bool, 0),

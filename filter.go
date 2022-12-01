@@ -5,6 +5,7 @@
 package log
 
 import (
+	LU "github.com/fbaube/logutils"
 	"strings"
 )
 
@@ -13,7 +14,7 @@ type Filter struct {
 	catNames    map[string]bool
 	catPrefixes []string
 
-	MaxLevel   Level    // the maximum severity level that is allowed
+	MaxLevel   LU.Level // the maximum severity level that is allowed
 	Categories []string // the allowed message categories. Categories can use "*" as a suffix for wildcard matching.
 }
 

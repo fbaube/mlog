@@ -7,6 +7,7 @@ package log
 import (
 	"errors"
 	"fmt"
+	LU "github.com/fbaube/logutils"
 	"io"
 	"net/smtp"
 	"strings"
@@ -33,7 +34,7 @@ type MailTarget struct {
 // You must specify these fields: Host, Username, Subject, Sender, and Recipients.
 func NewMailTarget() *MailTarget {
 	return &MailTarget{
-		Filter:     &Filter{MaxLevel: LevelDbg},
+		Filter:     &Filter{MaxLevel: LU.LevelDbg},
 		BufferSize: 1024,
 		close:      make(chan bool, 0),
 	}

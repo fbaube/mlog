@@ -12,6 +12,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	LU "github.com/fbaube/logutils"
 	"io"
 	"os"
 	"runtime"
@@ -21,7 +22,7 @@ import (
 )
 
 // Level describes the level of a log message.
-type Level int
+// type Level int
 
 // L is the predefined default global logger.
 var L *Logger
@@ -34,6 +35,8 @@ var pCoreLogger *Logger
 func init() {
 	L = NewLogger()
 }
+
+/*
 
 // RFC5424 log message levels.
 const (
@@ -68,9 +71,11 @@ func (l Level) String() string {
 	return "Unknown_WTH"
 }
 
+*/
+
 // Entry represents a log entry.
 type Entry struct {
-	Level            Level
+	Level            LU.Level
 	Category         string
 	Message          string
 	Time             time.Time
@@ -117,7 +122,7 @@ type coreLogger struct {
 	//                 // message. 0 means do not log any call stack frame.
 	CallStackFilter string // a substring that a call stack frame filepath
 	//                     // should contain in order for the frame to be counted
-	MaxLevel Level    // the maximum level of messages to be logged
+	MaxLevel LU.Level // the maximum level of messages to be logged
 	Targets  []Target // targets for sending log messages to
 }
 
@@ -133,13 +138,13 @@ type Logger struct {
 
 // NewLogger creates a root logger.
 // The new logger takes these default options:
-// ErrorWriter: os.Stderr, BufferSize: 1024, MaxLevel: LevelDebug,
+// ErrorWriter: os.Stderr, BufferSize: 1024, MaxLevel: LU.LevelDebug,
 // Category: app, Formatter: DefaultFormatter
 func NewLogger() *Logger {
 	logger := &coreLogger{
 		ErrorWriter: os.Stderr,
 		BufferSize:  1024,
-		MaxLevel:    LevelDbg,
+		MaxLevel:    LU.LevelDbg,
 		Targets:     make([]Target, 0),
 	}
 	pCoreLogger = &Logger{logger, "", DefaultFormatter}
@@ -152,7 +157,7 @@ func NewNullLogger() *Logger {
 	logger := &coreLogger{
 		ErrorWriter: io.Discard,
 		BufferSize:  1024,
-		MaxLevel:    LevelError,
+		MaxLevel:    LU.LevelError,
 		Targets:     make([]Target, 0),
 	}
 	pCoreLogger = &Logger{logger, "", DefaultFormatter}
@@ -173,7 +178,7 @@ func (l *Logger) GetLogger(category string, formatter ...Formatter) *Logger {
 // Panic logs a message indicating the system is dying,
 // but does NOT actually execute a call to panic(..)
 func (l *Logger) Panic(format string, a ...interface{}) {
-	l.Log(LevelPanic, format, a...)
+	l.Log(LU.LevelPanic, format, a...)
 }
 
 // Error logs a message indicating an error condition.
@@ -182,37 +187,37 @@ func (l *Logger) Panic(format string, a ...interface{}) {
 // If multiple parameters are provided, they are passed
 // to fmt.Sprintf() to generate the log message.
 func (l *Logger) Error(format string, a ...interface{}) {
-	l.Log(LevelError, format, a...)
+	l.Log(LU.LevelError, format, a...)
 }
 
 // Warning logs a message indicating a warning condition.
 func (l *Logger) Warning(format string, a ...interface{}) {
-	l.Log(LevelWarning, format, a...)
+	l.Log(LU.LevelWarning, format, a...)
 }
 
 // Okay logs a message indicating an okay condition.
 func (l *Logger) Okay(format string, a ...interface{}) {
-	l.Log(LevelOkay, format, a...)
+	l.Log(LU.LevelOkay, format, a...)
 }
 
 // Info logs a message for a normal but meaningful condition.
 func (l *Logger) Info(format string, a ...interface{}) {
-	l.Log(LevelInfo, format, a...)
+	l.Log(LU.LevelInfo, format, a...)
 }
 
 // Progress logs a message for how things are progressing.
 func (l *Logger) Progress(format string, a ...interface{}) {
-	l.Log(LevelProgress, format, a...)
+	l.Log(LU.LevelProgress, format, a...)
 }
 
 // Dbg logs a message for debugging purpose.
 // Please refer to Error() for how to use this method.
 func (l *Logger) Dbg(format string, a ...interface{}) {
-	l.Log(LevelDbg, format, a...)
+	l.Log(LU.LevelDbg, format, a...)
 }
 
 // Log logs a message of a specified severity level.
-func (l *Logger) Log(level Level, format string, a ...interface{}) {
+func (l *Logger) Log(level LU.Level, format string, a ...interface{}) {
 	if level > l.MaxLevel || !l.open {
 		return
 	}
@@ -233,8 +238,8 @@ func (l *Logger) Log(level Level, format string, a ...interface{}) {
 	l.entries <- entry
 }
 
-func (l *Logger) LogWithString(level Level, format string, special string, a ...interface{}) {
-	// func (l *Logger) Log(level Level, format string, a ...interface{}) {
+func (l *Logger) LogWithString(level LU.Level, format string, special string, a ...interface{}) {
+	// func (l *Logger) Log(level LU.Level, format string, a ...interface{}) {
 	if level > l.MaxLevel || !l.open {
 		return
 	}
@@ -255,7 +260,7 @@ func (l *Logger) LogWithString(level Level, format string, special string, a ...
 	l.entries <- entry
 }
 
-func SetMaxLevel(lvl Level) {
+func SetMaxLevel(lvl LU.Level) {
 	pCoreLogger.MaxLevel = lvl
 }
 
@@ -343,7 +348,7 @@ func DefaultFormatter(l *Logger, e *Entry) string {
 		sCtg = fmt.Sprintf("[%s]", e.Category)
 	}
 	return fmt.Sprintf("%s %s%s"+ /*[%s]*/ "%s %v %v",
-		sTime, EmojiOfLevel(e.Level), EmojiOfLevel(e.Level), // sLvl,
+		sTime, LU.EmojiOfLevel(e.Level), LU.EmojiOfLevel(e.Level), // sLvl,
 		sCtg, e.Message, e.CallStack)
 }
 

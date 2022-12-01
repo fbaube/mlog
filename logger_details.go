@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	LU "github.com/fbaube/logutils"
 	S "strings"
 )
 
@@ -15,7 +16,7 @@ type DetailsFormatter func(*Logger, *Entry, []string) string
 // not to "text quotes", which logging is an atomic operation.
 type DetailsInfo struct {
 	DoingDetails     bool
-	MinLogLevel      Level
+	MinLogLevel      LU.Level
 	Category         string
 	Subcategory      string
 	DetailsFormatter // message formatter
@@ -45,7 +46,6 @@ type DetailsInfo struct {
 // and clearer, and follows the existing processing architecture,
 // to make the call for every Target in a Logger, but then in the
 // Logger method call, check each Target for being a DetailsTarget.
-//
 type DetailsTarget interface {
 	Target
 	StartLogDetailsBlock(string, *Entry) // s = Category e.g. "[01]" and clear Subcat
@@ -94,7 +94,6 @@ func (l *coreLogger) SetSubcategory(s string) {
 //
 // Note that this only really works with single threading, or else the
 // log messages of different Details sets get all mised up.
-//
 func DefaultDetailsFormatter(l *Logger, e *Entry, spcl []string) string {
 	var sTime, sLvl, sCtg, sSpcl string
 	sLvl = e.Level.String()
@@ -115,7 +114,7 @@ func DefaultDetailsFormatter(l *Logger, e *Entry, spcl []string) string {
 		sSpcl = " (" + sb.String()[1:] + ") "
 	}
 	return fmt.Sprintf("%s %s%s[%s]%s %v %v",
-		sTime, sSpcl, EmojiOfLevel(e.Level), sLvl, sCtg,
+		sTime, sSpcl, LU.EmojiOfLevel(e.Level), sLvl, sCtg,
 		e.Message, e.CallStack)
 }
 

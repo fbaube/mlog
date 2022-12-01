@@ -7,6 +7,7 @@ package log
 import (
 	"errors"
 	"fmt"
+	LU "github.com/fbaube/logutils"
 	"io"
 	"net"
 )
@@ -43,7 +44,7 @@ type NetworkTarget struct {
 // You must specify the Network and Address fields.
 func NewNetworkTarget() *NetworkTarget {
 	return &NetworkTarget{
-		Filter:     &Filter{MaxLevel: LevelDbg},
+		Filter:     &Filter{MaxLevel: LU.LevelDbg},
 		BufferSize: 1024,
 		Persistent: true,
 		close:      make(chan bool, 0),
