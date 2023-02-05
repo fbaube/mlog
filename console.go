@@ -28,7 +28,8 @@ func newControlSequenceTextBrush(format string) ControlSequenceTextBrush {
 	}
 }
 
-/*
+/* Colors
+
        FG  BG
 Black: 30  40
 Red:   31  41

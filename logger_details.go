@@ -57,10 +57,9 @@ type DetailsTarget interface {
 	SetSubcategory(string)
 }
 
-/*
-StartLogDetailsBlock(string, *Entry) // s = Category e.g. "[01]" and clear Subcat
-CloseLogDetailsBlock(string)
-*/
+// StartLogDetailsBlock(string, *Entry) // s = Category e.g. "[01]" and clear Subcat
+
+// CloseLogDetailsBlock(string)
 
 // SetCategory is for DetailsTarget's.
 func (l *coreLogger) SetCategory(s string) {
