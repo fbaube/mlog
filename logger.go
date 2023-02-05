@@ -36,43 +36,6 @@ func init() {
 	L = NewLogger()
 }
 
-/*
-
-// RFC5424 log message levels.
-const (
-	LevelPanic    Level = iota + 2
-	LevelError          // 3
-	LevelWarning        // 4
-	LevelOkay           // 5
-	LevelInfo           // 6
-	LevelProgress       // 7
-	LevelDbg            // misspelled cos 8 != RFC5424 "7"
-	//
-	// Utility levels for fancier console output
-	GreenBG
-)
-
-// LevelNames maps log levels to user-frenly names
-var LevelNames = map[Level]string{
-	LevelDbg:      "?Dbg",
-	LevelProgress: "Progress",
-	LevelInfo:     "Info",
-	LevelOkay:     "Okay",
-	LevelWarning:  "Warning",
-	LevelError:    "Error",
-	LevelPanic:    "PANIC",
-}
-
-// String returns the string representation of the log level
-func (l Level) String() string {
-	if name, ok := LevelNames[l]; ok {
-		return name
-	}
-	return "Unknown_WTH"
-}
-
-*/
-
 // Entry represents a log entry.
 type Entry struct {
 	Level            LU.Level
