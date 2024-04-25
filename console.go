@@ -50,8 +50,8 @@ Strkthru ;9
 */
 
 var CtlSeqTextBrushes = map[LU.Level]ControlSequenceTextBrush{
-	LU.LevelDbg:      newControlSequenceTextBrush("30;2"),   // grey
-	LU.LevelProgress: newControlSequenceTextBrush("36"),     // cyan
+	LU.LevelDebug:      newControlSequenceTextBrush("30;2"),   // grey
+	// LU.LevelProgress: newControlSequenceTextBrush("36"),     // cyan
 	LU.LevelInfo:     newControlSequenceTextBrush("36"),     // cyan
 	LU.LevelOkay:     newControlSequenceTextBrush("32"),     // green
 	LU.LevelWarning:  newControlSequenceTextBrush("31"),     // red
@@ -83,7 +83,7 @@ func (t *ConsoleTarget) SetSubcategory(s string) {
 // .
 func NewConsoleTarget() *ConsoleTarget {
 	return &ConsoleTarget{
-		Filter:    &Filter{MaxLevel: LU.LevelDbg},
+		Filter:    &Filter{MaxLevel: LU.LevelDebug},
 		ColorMode: true,
 		Writer:    os.Stdout,
 		close:     make(chan bool, 0),

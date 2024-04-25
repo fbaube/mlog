@@ -107,7 +107,7 @@ func NewLogger() *Logger {
 	logger := &coreLogger{
 		ErrorWriter: os.Stderr,
 		BufferSize:  1024,
-		MaxLevel:    LU.LevelDbg,
+		MaxLevel:    LU.LevelDebug,
 		Targets:     make([]Target, 0),
 	}
 	pCoreLogger = &Logger{logger, "", DefaultFormatter}
@@ -168,15 +168,17 @@ func (l *Logger) Info(format string, a ...interface{}) {
 	l.Log(LU.LevelInfo, format, a...)
 }
 
+/*
 // Progress logs a message for how things are progressing.
 func (l *Logger) Progress(format string, a ...interface{}) {
 	l.Log(LU.LevelProgress, format, a...)
 }
+*/
 
-// Dbg logs a message for debugging purpose.
+// Debug logs a message for debugging purpose.
 // Please refer to Error() for how to use this method.
-func (l *Logger) Dbg(format string, a ...interface{}) {
-	l.Log(LU.LevelDbg, format, a...)
+func (l *Logger) Debug(format string, a ...interface{}) {
+	l.Log(LU.LevelDebug, format, a...)
 }
 
 // Log logs a message of a specified severity level.

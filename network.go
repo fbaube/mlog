@@ -44,7 +44,7 @@ type NetworkTarget struct {
 // You must specify the Network and Address fields.
 func NewNetworkTarget() *NetworkTarget {
 	return &NetworkTarget{
-		Filter:     &Filter{MaxLevel: LU.LevelDbg},
+		Filter:     &Filter{MaxLevel: LU.LevelDebug},
 		BufferSize: 1024,
 		Persistent: true,
 		close:      make(chan bool, 0),

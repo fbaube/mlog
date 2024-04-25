@@ -1,2 +1,4 @@
 github.com/fbaube/logutils v0.0.0-20240118190821-fba0e702dd07 h1:pnt16LF2Gq3myuCjvsTRqc6KUUquBD+gIV9YKHsH+qw=
 github.com/fbaube/logutils v0.0.0-20240118190821-fba0e702dd07/go.mod h1:VifbtSBHXXNZhfgnsxhS7D++YcGbPt7esvjC7FCbFW4=
+github.com/fbaube/logutils v0.0.0-20240424185106-74c4aec59ce1 h1:TROWHi4ogqajl3kEfc5DRJh7HgVC3tPyj7qaGe16B+s=
+github.com/fbaube/logutils v0.0.0-20240424185106-74c4aec59ce1/go.mod h1:Ulyk3vIjQ5L/NqJ9wmTMawBjqzAOvCs1jxF5iV3tS1w=

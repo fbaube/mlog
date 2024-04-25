@@ -34,7 +34,7 @@ type MailTarget struct {
 // You must specify these fields: Host, Username, Subject, Sender, and Recipients.
 func NewMailTarget() *MailTarget {
 	return &MailTarget{
-		Filter:     &Filter{MaxLevel: LU.LevelDbg},
+		Filter:     &Filter{MaxLevel: LU.LevelDebug},
 		BufferSize: 1024,
 		close:      make(chan bool, 0),
 	}
